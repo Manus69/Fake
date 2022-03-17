@@ -3,16 +3,17 @@
 char* GetFieldValue(char* string)
 {
     Int     index;
+    char*   result;
 
     index = StringFindC(string, COL_SEPARATOR);
     if (index == NOT_FOUND)
         return NULL;
 
     string += (index + 1);
-    while (*string && IsSpace(*string))
-        ++ string;
+    result = StringStrip(string, ' ', ' ');
+    WhySavePtr(&result);
 
-    return string;
+    return result;
 }
 
 static Int _iterate(Config* config, const Deck* lines, Uint n_items)
@@ -56,11 +57,31 @@ static bool _config_validate(const Deck* lines, Uint n_lines)
     return true;
 }
 
+static Int _fix_obj_dir(Config* config)
+{
+    Int n;
+
+    if (!(n = strlen(config->obj_dir)))
+        return WHY_ERROR;
+    
+    -- n;
+    while (n >= 0)
+    {
+        if (config->obj_dir[n] == '/')
+            config->obj_dir[n] = 0;
+        else break ;
+
+        -- n;
+    }
+
+    return n >= 0 ? WHY_OK : WHY_ERROR;
+}
+
 static void* _quit(Deck* lines, Deck* all_lines, Config* config)
 {
     DeckDestroy(lines);
     DeckDestroy(all_lines);
-    free(config);
+    ConfigDestroy(config);
 
     return NULL;
 }
@@ -99,9 +120,26 @@ Config* ConfigCreate(const char* file_name)
     if (_iterate(config, lines, n_items) == WHY_ERROR)
         return _quit(lines, all_lines, config);
 
+    if (_fix_obj_dir(config) == WHY_ERROR)
+        return _quit(lines, all_lines, config);
+
     DeckDestroy(lines);
     DeckDestroy(all_lines);
     WhySavePtr(&config);
 
     return config;
+}
+
+void ConfigDestroy(Config* config)
+{
+    // Uint n;
+
+    // n = 0;
+    // while (n < N_FIELDS_IN_CONFIG)
+    // {
+    //     free(((char **)config)[n]);
+    //     ++ n;
+    // }
+
+    free(config);
 }

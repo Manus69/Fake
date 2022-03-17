@@ -116,14 +116,31 @@ int main()
     Config* config;
 
     if (!FileExists(FAKEFILE_NAME))
-        FakefileCreate();
+    {
+        if (FakefileCreate() == WHY_ERROR)
+            return WhyEnd();
+    }
 
     if (!(config = ConfigCreate(FAKEFILE_NAME)))
         return WhyEnd();
 
-    char* cmd = GetCommand("penis.c", config, true);
-    printf("%s\n", cmd);
-    free(cmd);
+    if (CreateObjDir(config))
+        return WhyEnd();
+
+    Deck* src = GetSourceFileNamesToCompile(config);
+    PrintDeck(src, PrintCstrP);
+    Deck* cmds = GetCompilationCommands(src, config, true);
+    DeckDestroy(src);
+    PrintDeck(cmds, PrintCstrP);
+    DeckDestroy(cmds);
+
+    // struct stat stats;
+    // stat("test.c", &stats);
+    // printf("%ld %ld\n", stats.st_mtim.tv_sec, stats.st_atim.tv_sec);
+    // stat("obj/test.o", &stats);
+    // printf("%ld %ld\n", stats.st_mtim.tv_sec, stats.st_atim.tv_sec);
+
+    // ConfigDestroy(config);
 
     return WhyEnd();
 }

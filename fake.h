@@ -28,7 +28,7 @@
 #define LINKER_STR ("Linker flags:")
 #define LINKER_VAL ("")
 #define OBJ_DIR_STR ("Object directory:")
-#define OBJ_DIR_VAL (" obj/")
+#define OBJ_DIR_VAL (" obj")
 #define SRC_DIR_STR ("Source directory:")
 #define SRC_DIR_VAL (" .")
 #define TARGET_STR ("Target name:")
@@ -52,10 +52,17 @@ struct Config
 };
 
 Int FakefileCreate();
+Int CreateObjDir(const Config* config);
 Config* ConfigCreate(const char* file_name);
+void ConfigDestroy(Config* config);
 Deck* GetAllFileNames(const Config* config);
 Deck* GetSourceFileNames(const Config* config);
+Deck* GetSourceFileNamesToCompile(const Config* config);
 Int CreateObjDir(const Config* config);
 char* GetCommand(const char* file_name, const Config* config, bool debug);
+Deck* GetCompilationCommands(const Deck* file_names, const Config* config, bool debug);
+Int RunAllCommands(const Deck* commands);
+
+void DBG_display_time(const struct stat* lhs, const struct stat* rhs);
 
 #endif

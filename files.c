@@ -2,6 +2,41 @@
 
 static const Config* _config;
 
+char* GetObjName(const char* src_name, const Config* config)
+{
+    char* base_name;
+    char* result;
+
+    base_name = FileNameBase(src_name);
+    result = StringJoinVariadic(config->obj_dir, "/", base_name, ".o", NULL);
+    free(base_name);
+
+    return result;
+}
+
+bool FileNeedsCompilation(const char* name, const Config* config)
+{
+    char*       obj_file;
+    struct stat lhs_stats;
+    struct stat rhs_stats;
+
+    obj_file = GetObjName(name, config);
+    WhySavePtr(&obj_file);
+
+    if (stat(name, &lhs_stats) < 0)
+        return false;
+    
+    if (stat(obj_file, &rhs_stats) < 0)
+        return true;
+
+    return lhs_stats.st_mtim.tv_sec > rhs_stats.st_mtim.tv_sec;
+}
+
+static bool _needs_compilationWRAP(const void* name)
+{
+    return FileNeedsCompilation(*(char **)name, _config);
+}
+
 Int CreateObjDir(const Config* config)
 {
     if (!FileExists(config->obj_dir))
@@ -139,4 +174,19 @@ Deck* GetSourceFileNames(const Config* config)
     DeckDestroy(file_names);
 
     return source;
+}
+
+Deck* GetSourceFileNamesToCompile(const Config* config)
+{
+    Deck* source;
+    Deck* to_compile;
+
+    if (!(source = GetSourceFileNames(config)))
+        return NULL;
+    
+    to_compile = DeckFilter(source, _needs_compilationWRAP);
+
+    DeckDestroy(source);
+
+    return to_compile;
 }
