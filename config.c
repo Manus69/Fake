@@ -132,14 +132,5 @@ Config* ConfigCreate(const char* file_name)
 
 void ConfigDestroy(Config* config)
 {
-    // Uint n;
-
-    // n = 0;
-    // while (n < N_FIELDS_IN_CONFIG)
-    // {
-    //     free(((char **)config)[n]);
-    //     ++ n;
-    // }
-
     free(config);
 }

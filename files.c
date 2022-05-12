@@ -176,6 +176,35 @@ Deck* GetSourceFileNames(const Config* config)
     return source;
 }
 
+Deck* GetObjFileNames(const Config* config)
+{
+    Deck*       src_files;
+    Deck*       obj_files;
+    char*       obj_name;
+    Iterator    iterator;
+
+    if (!(src_files = GetSourceFileNames(config)))
+        return NULL;
+
+    if (!(obj_files = DeckCreatePtr(NULL, NULL)))
+    {
+        DeckDestroy(src_files);
+        return NULL;
+    }
+
+    IteratorInit(&iterator);
+    while (DeckNext(src_files, &iterator))
+    {
+        obj_name = GetObjName(*(char **)iterator.item_pointer, config);
+        WhySavePtr(&obj_name);
+        DeckPushBack(obj_files, &obj_name);
+    }
+
+    DeckDestroy(src_files);
+
+    return obj_files;
+}
+
 Deck* GetSourceFileNamesToCompile(const Config* config)
 {
     Deck* source;

@@ -127,20 +127,10 @@ int main()
     if (CreateObjDir(config))
         return WhyEnd();
 
-    Deck* src = GetSourceFileNamesToCompile(config);
-    PrintDeck(src, PrintCstrP);
-    Deck* cmds = GetCompilationCommands(src, config, true);
-    DeckDestroy(src);
-    PrintDeck(cmds, PrintCstrP);
-    DeckDestroy(cmds);
-
-    // struct stat stats;
-    // stat("test.c", &stats);
-    // printf("%ld %ld\n", stats.st_mtim.tv_sec, stats.st_atim.tv_sec);
-    // stat("obj/test.o", &stats);
-    // printf("%ld %ld\n", stats.st_mtim.tv_sec, stats.st_atim.tv_sec);
-
-    // ConfigDestroy(config);
+    Deck* commands = GetAllCommands(config, true);
+    // PrintDeck(commands, PrintCstrN);
+    RunAllCommands(commands);
+    DeckDestroy(commands);
 
     return WhyEnd();
 }
